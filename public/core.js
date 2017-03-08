@@ -17,16 +17,38 @@ function mainController($scope, $http) {
     }
 
     // Página incial, obtemos e mostramos todas as tarefas
-    $http.get($scope.apiUrl + '/processes/' + $scope.config.processId + '/objects', { headers: $scope.config.headers })
-        .success(function(result) {
-            if (result.sucess) {
-                $scope.todos = result.data;                
-            }
-            console.log(result);
-        })
-        .error(function(result) {
-            console.log('Error: ' + result);
-        });
+    function listTodo () {
+        $http.get($scope.apiUrl + '/processes/' + $scope.config.processId + '/objects', { headers: $scope.config.headers })
+            .success(function (result) {
+                var data = [];
+
+                if (result.success && result.data.size > 0) {
+                    result.data.items.forEach(function (item, key) {
+
+                        var fields = {};
+                        if (Array.isArray(item.fields)) {
+                            item.fields.forEach(function (field, i) {
+                                fields[field.fieldId] = field.value;
+                            })
+                        }
+
+                        data.push({
+                            '_id': item._id,
+                            'step': item.protected.currentSteps[0].stepId,
+                            'text': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9'],
+                            'dueDate': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9']
+                        });
+                    })
+                }
+
+                $scope.todos = data;
+                console.log(data);
+            }).error(function (result) {
+                console.log('Error: ' + result);
+            });
+    };
+
+    listTodo();
 
     // Cria uma nova tarefa, enviando o texto para a V3 API
     $scope.createTodo = function() {
