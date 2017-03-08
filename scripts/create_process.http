@@ -63,6 +63,8 @@ Cache-Control: no-cache
           },
           "entryStep": true,
           "finishStep": false,
+          "bulkEnabled": false,
+          "externallyShared": false,
           "fields": [
             {
               "fieldId": "b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9",
