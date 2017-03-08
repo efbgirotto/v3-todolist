@@ -1,0 +1,120 @@
+POST /processes HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+Authorization: Basic ZmVybmFuZG86ZkAxMjM=
+Tenant-Id: 00000000-0000-0000-0000-000000000001
+Cache-Control: no-cache
+
+{
+  "active": true,
+  "name": "myTodoList",
+  "title": {
+    "pt-br": "Minha Lista de Tarefas"
+  },
+  "description": {
+    "pt-br": "Demonstração para o V3 Day."
+  },
+  "defaultLang": "pt-br",
+  "versions": [
+    {
+      "version": 1,
+      "draft": false,
+      "fields": [
+        {
+          "_id": "b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9",
+          "name": "text",
+          "label": {
+            "pt-br": "Descrição da tarefa"
+          },
+          "fieldConfig": {
+            "fieldType": "text",
+            "valueSpecs": {
+              "array": false
+            },
+            "maxLength": 150,
+            "multiline": true
+          }
+        },
+        {
+          "_id": "a8642860-2296-4a9d-94bf-2397ffefe733",
+          "name": "dueDate",
+          "label": {
+            "pt-br": "Data de expiração"
+          },
+          "fieldConfig": {
+            "fieldType": "date",
+            "valueSpecs": {
+              "array": false
+            },
+            "minDate": "2017-03-08",
+            "exclusiveMinDate": false,
+            "maxDate": "2025-12-31",
+            "exclusiveMaxDate": false
+          }
+        }
+      ],
+      "steps": [
+        {
+          "_id": "81ac0f26-3a4d-42cd-843c-177aff5ff22f",
+          "index": 0,
+          "name": "activeTasks",
+          "title": {
+            "pt-br": "Tarefas ativas"
+          },
+          "entryStep": true,
+          "finishStep": false,
+          "fields": [
+            {
+              "fieldId": "b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9",
+              "index": 0,
+              "required": true,
+              "readOnly": false
+            },
+            {
+              "fieldId": "b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9",
+              "index": 0,
+              "required": false,
+              "readOnly": false
+            }
+          ],
+          "nextSteps": [
+            {
+              "index": 0,
+              "stepId": "a706e433-8fae-451c-8dc9-7ea61b894ada"
+            }
+          ]
+        },
+        {
+          "_id": "a706e433-8fae-451c-8dc9-7ea61b894ada",
+          "index": 1,
+          "name": "completedTasks",
+          "title": {
+            "pt-br": "Tarefas concluídas"
+          },
+          "entryStep": false,
+          "finishStep": true,
+          "fields": [
+            {
+              "fieldId": "b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9",
+              "index": 0,
+              "required": true,
+              "readOnly": false
+            },
+            {
+              "fieldId": "b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9",
+              "index": 0,
+              "required": false,
+              "readOnly": false
+            }
+          ],
+          "nextSteps": [
+            {
+              "index": 0,
+              "stepId": "81ac0f26-3a4d-42cd-843c-177aff5ff22f"
+            }
+          ]
+        }
+      ]
+  }
+  ]
+}
