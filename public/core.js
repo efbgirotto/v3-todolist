@@ -16,39 +16,36 @@ function mainController($scope, $http) {
         stepId: '81ac0f26-3a4d-42cd-843c-177aff5ff22f'
     }
 
+    function transform(object) {
+        var fields = {};
+        if (Array.isArray(object.fields)) {
+            object.fields.forEach(function (field, i) {
+                fields[field.fieldId] = field.value;
+            })
+        }
+        
+        return {
+            'id': object._id,
+            'step': object.protected.currentSteps[0].stepId,
+            'text': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9'],
+            'dueDate': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9']
+        };
+    }
+
     // Página incial, obtemos e mostramos todas as tarefas
-    function listTodo () {
-        $http.get($scope.apiUrl + '/processes/' + $scope.config.processId + '/objects', { headers: $scope.config.headers })
-            .success(function (result) {
-                var data = [];
+    $http.get($scope.apiUrl + '/processes/' + $scope.config.processId + '/objects?limit=50', { headers: $scope.config.headers })
+        .success(function (result) {
+            $scope.todos = [];
 
-                if (result.success && result.data.size > 0) {
-                    result.data.items.forEach(function (item, key) {
-
-                        var fields = {};
-                        if (Array.isArray(item.fields)) {
-                            item.fields.forEach(function (field, i) {
-                                fields[field.fieldId] = field.value;
-                            })
-                        }
-
-                        data.push({
-                            '_id': item._id,
-                            'step': item.protected.currentSteps[0].stepId,
-                            'text': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9'],
-                            'dueDate': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9']
-                        });
-                    })
-                }
-
-                $scope.todos = data;
-                console.log(data);
-            }).error(function (result) {
-                console.log('Error: ' + result);
-            });
-    };
-
-    listTodo();
+            if (result.success && result.data.size > 0) {
+                result.data.items.forEach(function (item, key) {
+                    $scope.todos.push(transform(item));
+                })
+            }
+            console.log(result);
+        }).error(function (err) {
+            console.log('Error: ' + err);
+        });
 
     // Cria uma nova tarefa, enviando o texto para a V3 API
     $scope.createTodo = function() {
@@ -63,24 +60,39 @@ function mainController($scope, $http) {
         };
 
         $http.post($scope.apiUrl + '/objects', objectFormData, { headers: $scope.config.headers })
-            .success(function (data) {
+            .success(function (result) {
                 $scope.formData = {};
-                listTodo();
+
+                if (result.success) {
+                    $scope.todos.push(transform(result.data));
+                }
+                console.log(result);
             })
-            .error(function (data) {
-                console.log('Error: ' + data);
+            .error(function (err) {
+                console.log('Error: ' + err);
             });
     };
 
+    // Alterna a completude de uma tarefa
+    $scope.changeCompleteness = function(item) {
+        $http.put($scope.apiUrl + '/objects/' + item.id + '/steps/' + item.step, {}, { headers: $scope.config.headers } )
+            .success(function(result) {
+                console.log(result);
+            })
+            .error(function(err) {
+                console.log('Error: ' + err);
+            });
+    }
+
     // Exclui uma tarefa
     $scope.deleteTodo = function(id) {
-        $http.delete($scope.apiUrl + '/api/todos/' + id)
-            .success(function(data) {
-                $scope.todos = data;
-                console.log(data);
+        $http.delete($scope.apiUrl + '/objects/' + id, { headers: $scope.config.headers })
+            .success(function(result) {
+                //$scope.todos = data;
+                console.log(result);
             })
-            .error(function(data) {
-                console.log('Error: ' + data);
+            .error(function(err) {
+                console.log('Error: ' + err);
             });
     };
 
