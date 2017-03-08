@@ -52,13 +52,22 @@ function mainController($scope, $http) {
 
     // Cria uma nova tarefa, enviando o texto para a V3 API
     $scope.createTodo = function() {
-        $http.post($scope.apiUrl + '/api/todos', $scope.formData)
-            .success(function(data) {
+        var objectFormData = {
+            'processVersion': $scope.config.processVersion,
+            'processId': $scope.config.processId,
+            'stepId': $scope.config.stepId,
+            'fields': [
+                { 'fieldId': 'b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9', 'value': $scope.formData.text },
+                { 'fieldId': 'a8642860-2296-4a9d-94bf-2397ffefe733', 'value': null }
+            ]
+        };
+
+        $http.post($scope.apiUrl + '/objects', objectFormData, { headers: $scope.config.headers })
+            .success(function (data) {
                 $scope.formData = {};
-                $scope.todos = data;
-                console.log(data);
+                listTodo();
             })
-            .error(function(data) {
+            .error(function (data) {
                 console.log('Error: ' + data);
             });
     };
