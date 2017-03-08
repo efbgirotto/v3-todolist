@@ -88,7 +88,12 @@ function mainController($scope, $http) {
     $scope.deleteTodo = function(id) {
         $http.delete($scope.apiUrl + '/objects/' + id, { headers: $scope.config.headers })
             .success(function(result) {
-                //$scope.todos = data;
+                for (var i = 0; i < $scope.todos.length; i++) {
+                    if ($scope.todos[i].id == id) {
+                        $scope.todos.splice(i, 1);
+                        break;
+                    }
+                }
                 console.log(result);
             })
             .error(function(err) {
