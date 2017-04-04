@@ -28,7 +28,8 @@ function mainController($scope, $http) {
         return {
             'id': object._id,
             'step': object.protected.currentSteps[0].stepId,
-            'text': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9']
+            'text': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9'],
+            'dueDate': fields['a8642860-2296-4a9d-94bf-2397ffefe733']
         };
     }
 
@@ -55,7 +56,7 @@ function mainController($scope, $http) {
             'stepId': $scope.config.stepId,
             'fields': [
                 { 'fieldId': 'b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9', 'value': $scope.formData.text },
-                { 'fieldId': 'a8642860-2296-4a9d-94bf-2397ffefe733', 'value': '' }
+                { 'fieldId': 'a8642860-2296-4a9d-94bf-2397ffefe733', 'value': $scope.formData.date }
             ]
         };
 
