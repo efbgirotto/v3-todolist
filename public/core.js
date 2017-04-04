@@ -1,8 +1,11 @@
 var myTodoList = angular.module('myTodoList', []);
 
-function mainController($scope, $http) {
+myTodoList.controller('mainController', ['$scope', '$http', function($scope, $http) {
     $scope.formData = {};
     $scope.showedit = {};
+
+    $scope.formData.true = "a706e433-8fae-451c-8dc9-7ea61b894ada";
+    $scope.formData.false = "81ac0f26-3a4d-42cd-843c-177aff5ff22f";
 
     // V3 API
     $scope.apiUrl = 'http://api.acesso.io/v1'
@@ -138,4 +141,4 @@ function mainController($scope, $http) {
         $scope.showedit[item.id] = true;
     };
 
-}
+}]);

@@ -17,7 +17,7 @@
     </style>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script><!-- load jquery -->
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script><!-- load angular -->
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script><!-- load angular -->
     <script src="core.js"></script>
 
 </head>
@@ -46,7 +46,7 @@
                             <td class="col-md-10">
                                 <div class="checkbox">
                                     <input id="{{todo.id}}" type="checkbox" ng-change="changeCompleteness(todo)" ng-model="todo.step"
-                                        ng-true-value="a706e433-8fae-451c-8dc9-7ea61b894ada" ng-false-value="81ac0f26-3a4d-42cd-843c-177aff5ff22f">
+                                        ng-true-value="{{'\''+ formData.true + '\''}}" ng-false-value="{{'\''+ formData.false + '\''}}">
                                     <label for="{{todo.id}}" ng-hide="showedit[todo.id]">{{ todo.text }}</label>
                                     <div ng-show="showedit[todo.id]"><input id="{{todo.id}}" type="text"  ng-model="todo.text"></div>
                                 </div>
