@@ -44,12 +44,15 @@
                     <tbody>
                         <tr ng-repeat="todo in todos | filter:query">
                             <td class="col-md-10">
-                                <div class="checkbox" >
+                                <div class="checkbox">
                                     <input id="{{todo.id}}" type="checkbox" ng-change="changeCompleteness(todo)" ng-model="todo.step"
                                         ng-true-value="a706e433-8fae-451c-8dc9-7ea61b894ada" ng-false-value="81ac0f26-3a4d-42cd-843c-177aff5ff22f">
-                                    <label for="{{todo.id}}"> {{ todo.text }}</label>
+                                    <label for="{{todo.id}}" ng-hide="showedit[todo.id]">{{ todo.text }}</label>
+                                    <div ng-show="showedit[todo.id]"><input id="{{todo.id}}" type="text"  ng-model="todo.text"></div>
                                 </div>
                             </td>
+                            <td class="col-md-2 left" ng-show="showedit[todo.id]"><a href="" ng-click="alterTodo(todo)">save</a></td>
+                            <td class="col-md-2 left" ng-hide="showedit[todo.id]"><a href="" ng-click="editTodo(todo)">edit</a></td>
                             <td class="col-md-2 left"><a href="" ng-click="deleteTodo(todo.id)">remove</a></td>
                         </tr>
                     </tbody>

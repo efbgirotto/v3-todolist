@@ -2,6 +2,7 @@ var myTodoList = angular.module('myTodoList', []);
 
 function mainController($scope, $http) {
     $scope.formData = {};
+    $scope.showedit = {};
 
     // V3 API
     $scope.apiUrl = 'http://api.acesso.io/v1'
@@ -12,7 +13,7 @@ function mainController($scope, $http) {
             'X-Requested-With': undefined
         },
         processVersion: 1,
-        processId: '356d5c07-da32-4b6a-9535-758f9d40d813', // Obter ID após criar o processo pelo script "create_process.http"
+        processId: 'ac3b750d-e682-4fac-aed7-674814097dfb', // Obter ID após criar o processo pelo script "create_process.http"
         stepId: '81ac0f26-3a4d-42cd-843c-177aff5ff22f'
     }
 
@@ -27,8 +28,7 @@ function mainController($scope, $http) {
         return {
             'id': object._id,
             'step': object.protected.currentSteps[0].stepId,
-            'text': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9'],
-            'dueDate': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9']
+            'text': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9']
         };
     }
 
@@ -61,8 +61,6 @@ function mainController($scope, $http) {
 
         $http.post($scope.apiUrl + '/objects', objectFormData, { headers: $scope.config.headers })
             .success(function (result) {
-                $scope.formData = {};
-
                 if (result.success) {
                     $scope.todos.push(transform(result.data));
                 }
@@ -99,6 +97,44 @@ function mainController($scope, $http) {
             .error(function(err) {
                 console.log('Error: ' + err);
             });
+    };
+
+    // Altera a tarefa selecionada
+    $scope.alterTodo = function(item){
+        $http.post($scope.apiUrl + '/objects/' + item.id + '/locks', {"lockType": "step"}, { headers: $scope.config.headers } )
+        .success(function(r) {
+            var objectFormData = {
+                'processVersion': $scope.config.processVersion,
+                'processId': $scope.config.processId,
+                'stepId': $scope.config.stepId,
+                'fields': [
+                    { 'fieldId': 'b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9', 'value': item.text }
+                ]
+            };
+
+            $http.put($scope.apiUrl + '/objects/' + item.id, objectFormData, { headers: $scope.config.headers } )
+                .success(function(result) {
+                    console.log(result);
+                })
+                .error(function(err) {
+                    console.log('Error: ' + err);
+                });
+
+            $http.delete($scope.apiUrl + '/objects/' + item.id + '/locks/' + r._id, {"lockType": "step"}, { headers: $scope.config.headers } )
+                .success(function(result) {
+                    console.log(result);
+                })
+                .error(function(err) {
+                    console.log('Error: ' + err);
+                });
+
+            $scope.showedit[item.id] = false;
+        });   
+    }
+
+    // Altera a exibição da tarefa na exibição
+    $scope.editTodo  = function(item) {
+        $scope.showedit[item.id] = true;
     };
 
 }
