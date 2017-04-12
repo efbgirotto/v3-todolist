@@ -68,6 +68,10 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
                 if (result.success) {
                     $scope.todos.push(transform(result.data));
                 }
+                
+                $scope.formData.text = "";
+                $scope.formData.date = "";
+
                 console.log(result);
             })
             .error(function (err) {
@@ -96,7 +100,6 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
                         break;
                     }
                 }
-                console.log(result);
             })
             .error(function(err) {
                 console.log('Error: ' + err);
@@ -112,7 +115,8 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
                 'processId': $scope.config.processId,
                 'stepId': $scope.config.stepId,
                 'fields': [
-                    { 'fieldId': 'b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9', 'value': item.text }
+                    { 'fieldId': 'b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9', 'value': item.text },
+                    { 'fieldId': 'a8642860-2296-4a9d-94bf-2397ffefe733', 'value': item.dueDate }
                 ]
             };
 
@@ -124,12 +128,13 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
                     console.log('Error: ' + err);
                 });
 
-            $http.delete($scope.apiUrl + '/objects/' + item.id + '/locks/' + r._id, {"lockType": "step"}, { headers: $scope.config.headers } )
+
+            $http.delete($scope.apiUrl + '/objects/' + item.id + '/locks/' + r.data._id, { headers: $scope.config.headers })
                 .success(function(result) {
                     console.log(result);
                 })
                 .error(function(err) {
-                    console.log('Error: ' + err);
+                    console.log(err);
                 });
 
             $scope.showedit[item.id] = false;
