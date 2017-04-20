@@ -70,6 +70,9 @@
                     <div class="form-group">
                         <input type="date" class="form-control input-lg text-center" placeholder="Expiration Date" ng-model="formData.date" min="2017-03-08" max="2025-12-31" ng-model-options="{timezone:'UTC'}">
                     </div>  
+                    <div class="form-group">
+                        <input type="file" file-model="formData.file"/>
+                    </div>                    
                     <button type="submit" class="btn btn-primary btn-lg" ng-click="createTodo()">Add</button>
                 </form>
             </div>

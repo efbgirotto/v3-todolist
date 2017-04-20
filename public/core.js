@@ -1,5 +1,21 @@
 var myTodoList = angular.module('myTodoList', []);
 
+myTodoList.directive('fileModel', ['$parse', function ($parse) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            var model = $parse(attrs.fileModel);
+            var modelSetter = model.assign;
+
+            element.bind('change', function(){
+                scope.$apply(function(){
+                    modelSetter(scope, element[0].files[0]);
+                });
+            });
+        }
+    };
+}]);
+
 myTodoList.controller('mainController', ['$scope', '$http', function($scope, $http) {
     $scope.formData = {};
     $scope.showedit = {};
@@ -15,10 +31,43 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
             'Authorization': 'Basic djNkYXk6djNkYXlAMTIz',
             'X-Requested-With': undefined
         },
+        headersFile : {
+            'Content-Type': undefined,
+            'Tenant-Id': '00000000-0000-0000-0000-000000000001',
+            'Authorization': 'Basic djNkYXk6djNkYXlAMTIz',
+            'X-Requested-With': undefined
+        },                
         processVersion: 1,
         processId: 'ac3b750d-e682-4fac-aed7-674814097dfb', // Obter ID após criar o processo pelo script "create_process.http"
         stepId: '81ac0f26-3a4d-42cd-843c-177aff5ff22f'
     }
+
+    function uploadFile(item)
+    {    
+        var file = $scope.formData.file;
+        var fd = new FormData();
+        fd.append("file", file);
+
+        var fieldId = "eb9552b5-b435-4b60-a3a2-b7790567ea46";
+
+        $http.post($scope.apiUrl + '/objects/' + item._id + '/locks', {"lockType": "step"}, { headers: $scope.config.headers } )
+        .success(function(res) {
+
+            $http.post($scope.apiUrl + '/objects/' + item._id + '/fields/' + fieldId + '/files', fd, { headers: $scope.config.headersFile })
+            .success(function(result) {
+                $http.delete($scope.apiUrl + '/objects/' + item._id + '/locks/' + r.data._id, { headers: $scope.config.headers })
+                .success(function(r) {
+                    console.log(r);
+                })
+                .error(function(e) {
+                    console.log(e);
+                });
+            })
+            .error(function(err) {
+                console.log(err);
+            });
+        });        
+    }    
 
     function transform(object) {
         var fields = {};
@@ -72,6 +121,8 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
                 $scope.formData.text = "";
                 $scope.formData.date = "";
 
+                uploadFile(result.data);
+
                 console.log(result);
             })
             .error(function (err) {
@@ -122,16 +173,14 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
 
             $http.put($scope.apiUrl + '/objects/' + item.id, objectFormData, { headers: $scope.config.headers } )
                 .success(function(result) {
-                    console.log(result);
-                })
-                .error(function(err) {
-                    console.log('Error: ' + err);
-                });
-
-
-            $http.delete($scope.apiUrl + '/objects/' + item.id + '/locks/' + r.data._id, { headers: $scope.config.headers })
-                .success(function(result) {
-                    console.log(result);
+                    $http.delete($scope.apiUrl + '/objects/' + item.id + '/locks/' + r.data._id, { headers: $scope.config.headers })
+                    .success(function(result) {
+                        console.log(result);
+                    })
+                    .error(function(err) {
+                        console.log(err);
+                    });
+                    //console.log(result);
                 })
                 .error(function(err) {
                     console.log(err);
