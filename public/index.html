@@ -55,6 +55,7 @@
                             <td class="col-md-2 left" ng-show="showedit[todo.id]"><a href="" ng-click="alterTodo(todo)">save</a></td>
                             <td class="col-md-2 left" ng-hide="showedit[todo.id]"><a href="" ng-click="editTodo(todo)">edit</a></td>
                             <td class="col-md-2 left"><a href="" ng-click="deleteTodo(todo.id)">remove</a></td>
+                            <td class="col-md-2 left" ng-show="todo.file"><a href="" ng-click="download(todo)">download</a></td>
                         </tr>
                     </tbody>
                 </table>

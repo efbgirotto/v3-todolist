@@ -16,6 +16,7 @@ myTodoList.directive('fileModel', ['$parse', function ($parse) {
     };
 }]);
 
+
 myTodoList.controller('mainController', ['$scope', '$http', function($scope, $http) {
     $scope.formData = {};
     $scope.showedit = {};
@@ -81,7 +82,8 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
             'id': object._id,
             'step': object.protected.currentSteps[0].stepId,
             'text': fields['b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9'],
-            'dueDate': fields['a8642860-2296-4a9d-94bf-2397ffefe733']
+            'dueDate': fields['a8642860-2296-4a9d-94bf-2397ffefe733'],
+            'file': fields['eb9552b5-b435-4b60-a3a2-b7790567ea46']
         };
     }
 
@@ -95,7 +97,7 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
                     $scope.todos.push(transform(item));
                 })
             }
-            console.log(result);
+            //console.log(result);
         }).error(function (err) {
             console.log('Error: ' + err);
         });
@@ -114,16 +116,15 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
 
         $http.post($scope.apiUrl + '/objects', objectFormData, { headers: $scope.config.headers })
             .success(function (result) {
+                uploadFile(result.data);
+
                 if (result.success) {
                     $scope.todos.push(transform(result.data));
-                }
-                
+                }             
                 $scope.formData.text = "";
                 $scope.formData.date = "";
 
-                uploadFile(result.data);
-
-                console.log(result);
+                //console.log(result);
             })
             .error(function (err) {
                 console.log('Error: ' + err);
@@ -155,6 +156,23 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
             .error(function(err) {
                 console.log('Error: ' + err);
             });
+    };
+
+    $scope.download = function(item){
+        $http.get($scope.apiUrl + '/objects/' + item.id + '/fields/eb9552b5-b435-4b60-a3a2-b7790567ea46/files/'+item.file[0]._id, {responseType: 'arraybuffer', headers: $scope.config.headers })
+         .success(function (result) {
+            var blob = new Blob([result], {type: item.file[0].mimeType});
+
+            var fileURL = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = fileURL;
+            a.target = '_blank';
+            a.download = item.file[0].localFileName;
+            document.body.appendChild(a);
+            a.click();
+        }).error(function (err) {
+            console.log('Error: ' + err);
+        });
     };
 
     // Altera a tarefa selecionada
