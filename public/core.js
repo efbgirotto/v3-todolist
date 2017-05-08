@@ -21,8 +21,12 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
     $scope.formData = {};
     $scope.showedit = {};
 
+    $scope.formData.date = new Date();
+    
     $scope.formData.true = "a706e433-8fae-451c-8dc9-7ea61b894ada";
     $scope.formData.false = "81ac0f26-3a4d-42cd-843c-177aff5ff22f";
+
+    $scope.formData.page = 1;
 
     // V3 API
     $scope.apiUrl = 'http://api.acesso.io/v1'
@@ -43,32 +47,53 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
         stepId: '81ac0f26-3a4d-42cd-843c-177aff5ff22f'
     }
 
+    getTask(1);
+
     function uploadFile(item)
     {    
         var file = $scope.formData.file;
+        var page = $scope.formData.page;
         var fd = new FormData();
         fd.append("file", file);
+
+        if (file==undefined)
+        {
+            getTask(page);
+            return;
+        }
 
         var fieldId = "eb9552b5-b435-4b60-a3a2-b7790567ea46";
 
         $http.post($scope.apiUrl + '/objects/' + item._id + '/locks', {"lockType": "step"}, { headers: $scope.config.headers } )
-        .success(function(res) {
+        .success(function(responsePostLock) {
 
             $http.post($scope.apiUrl + '/objects/' + item._id + '/fields/' + fieldId + '/files', fd, { headers: $scope.config.headersFile })
-            .success(function(result) {
-                $http.delete($scope.apiUrl + '/objects/' + item._id + '/locks/' + res.data._id, { headers: $scope.config.headers })
-                .success(function(r) {
-                    console.log(r);
+            .success(function(responsePostFile) {
+
+                $http.delete($scope.apiUrl + '/objects/' + item._id + '/locks/' + responsePostLock.data._id, { headers: $scope.config.headers })
+                .success(function(responseDeleteLock) {
+
+                    getTask(page);
+
+                    /*$http.get($scope.apiUrl + '/objects/' + item._id + '/?fields=_id,protected(currentSteps(stepId)),fields(fieldId,value)', { headers: $scope.config.headers })
+                    .success(function (responseGetObject) {
+                        $scope.todos.push(transform(responseGetObject.data));
+                    }).error(function (errorGetObject) {
+                        console.log('Error: ' + errorGetObject);
+                    });*/
                 })
-                .error(function(e) {
-                    console.log(e);
+                .error(function(errorDeleteLock) {
+                    console.log(errorDeleteLock);
                 });
             })
-            .error(function(err) {
-                console.log(err);
+            .error(function(errorPostFile) {
+                console.log(errorPostFile);
             });
+        })
+        .error(function(errorPostLock) {
+            console.log(errorPostLock);
         });        
-    }    
+    }
 
     function transform(object) {
         var fields = {};
@@ -86,21 +111,30 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
             'file': fields['eb9552b5-b435-4b60-a3a2-b7790567ea46']
         };
     }
+     
+    $scope.getTodo = function (page) {        
+        getTask(page);
+    }
 
     // Página incial, obtemos e mostramos todas as tarefas
-    $http.get($scope.apiUrl + '/processes/' + $scope.config.processId + '/objects/?limit=50&fields=_id,protected(currentSteps(stepId)),fields(fieldId,value)', { headers: $scope.config.headers })
-        .success(function (result) {
-            $scope.todos = [];
+    function getTask(page)
+    {    
+        var offset = 5*(page-1);
 
-            if (result.success && result.data.size > 0) {
-                result.data.items.forEach(function (item, key) {
+        $http.get($scope.apiUrl + '/processes/' + $scope.config.processId + '/objects/?limit=5&offset='+offset+'&fields=_id,protected(currentSteps(stepId)),fields(fieldId,value)', { headers: $scope.config.headers })
+        .success(function (response) {
+            if (response.success && response.data.size > 0) {
+                $scope.formData.page = page;
+                $scope.todos = [];
+
+                response.data.items.forEach(function (item, key) {
                     $scope.todos.push(transform(item));
                 })
-            }
-            //console.log(result);
-        }).error(function (err) {
-            console.log('Error: ' + err);
+            }            
+        }).error(function (error) {
+            console.log('Error: ' + error);
         });
+    };    
 
     // Cria uma nova tarefa, enviando o texto para a V3 API
     $scope.createTodo = function() {
@@ -115,37 +149,38 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
         };
 
         $http.post($scope.apiUrl + '/objects', objectFormData, { headers: $scope.config.headers })
-            .success(function (result) {
-                uploadFile(result.data);
+            .success(function (response) {
+                uploadFile(response.data);
 
-                if (result.success) {
-                    $scope.todos.push(transform(result.data));
-                }             
-                $scope.formData.text = "";
-                $scope.formData.date = "";
-
-                //console.log(result);
+                /*if (response.success) {
+                    $scope.todos.push(transform(response.data));
+                }*/
+                $scope.formData.text = "";                
+                $scope.formData.date = new Date();
+                $scope.formData.file = undefined;
+                $scope.frm.$setPristine();
+                angular.element("input[type='file']").val('');
             })
-            .error(function (err) {
-                console.log('Error: ' + err);
+            .error(function (error) {
+                console.log('Error: ' + error);
             });
     };
 
     // Alterna a completude de uma tarefa
     $scope.changeCompleteness = function(item) {
         $http.put($scope.apiUrl + '/objects/' + item.id + '/steps/' + item.step, {}, { headers: $scope.config.headers } )
-            .success(function(result) {
-                console.log(result);
+            .success(function(response) {
+                //console.log(response);
             })
-            .error(function(err) {
-                console.log('Error: ' + err);
+            .error(function(error) {
+                console.log('Error: ' + error);
             });
     }
 
     // Exclui uma tarefa
     $scope.deleteTodo = function(id) {
         $http.delete($scope.apiUrl + '/objects/' + id, { headers: $scope.config.headers })
-            .success(function(result) {
+            .success(function(response) {
                 for (var i = 0; i < $scope.todos.length; i++) {
                     if ($scope.todos[i].id == id) {
                         $scope.todos.splice(i, 1);
@@ -153,15 +188,15 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
                     }
                 }
             })
-            .error(function(err) {
-                console.log('Error: ' + err);
+            .error(function(error) {
+                console.log('Error: ' + error);
             });
     };
 
     $scope.download = function(item){
         $http.get($scope.apiUrl + '/objects/' + item.id + '/fields/eb9552b5-b435-4b60-a3a2-b7790567ea46/files/'+item.file[0]._id, {responseType: 'arraybuffer', headers: $scope.config.headers })
-         .success(function (result) {
-            var blob = new Blob([result], {type: item.file[0].mimeType});
+         .success(function (response) {
+            var blob = new Blob([response], {type: item.file[0].mimeType});
 
             var fileURL = URL.createObjectURL(blob);
             var a = document.createElement('a');
@@ -170,31 +205,34 @@ myTodoList.controller('mainController', ['$scope', '$http', function($scope, $ht
             a.download = item.file[0].localFileName;
             document.body.appendChild(a);
             a.click();
-        }).error(function (err) {
-            console.log('Error: ' + err);
+        }).error(function (error) {
+            console.log('Error: ' + error);
         });
     };
 
     // Altera a tarefa selecionada
     $scope.alterTodo = function(item){
         $http.post($scope.apiUrl + '/objects/' + item.id + '/locks', {"lockType": "step"}, { headers: $scope.config.headers } )
-        .success(function(r) {
+        .success(function(responsePostLock) {
 
             $http.put($scope.apiUrl + '/objects/' + item.id + '/fields/b0d71bee-8fb1-46a2-be71-3bbb8f81ccd9', {'value': item.text}, { headers: $scope.config.headers } )
-                .success(function(result) {
-                    $http.delete($scope.apiUrl + '/objects/' + item.id + '/locks/' + r.data._id, { headers: $scope.config.headers })
-                    .success(function(result) {
-                        console.log(result);
+                .success(function(responsePutField) {
+
+                    $http.delete($scope.apiUrl + '/objects/' + item.id + '/locks/' + responsePostLock.data._id, { headers: $scope.config.headers })
+                    .success(function(responseDeleteLock) {
+                        //console.log(responseDeleteLock);
                     })
-                    .error(function(err) {
-                        console.log(err);
+                    .error(function(errorDeleteLock) {
+                        console.log(errorDeleteLock);
                     });
                 })
-                .error(function(err) {
-                    console.log(err);
+                .error(function(errorPutField) {
+                    console.log(errorPutField);
                 });
-
             $scope.showedit[item.id] = false;
+        })
+        .error(function(errorPostLock) {
+            console.log(errorPostLock);
         });   
     }
 

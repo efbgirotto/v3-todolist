@@ -40,7 +40,7 @@
 
         <div id="todo-list" class="row">
             <div class="col-sm-4 col-sm-offset-4">
-                <table class="table-condensed table-hover">
+                <table class="table table-hover">
                     <tbody>
                         <tr ng-repeat="todo in todos | filter:query">
                             <td class="col-md-10">
@@ -52,29 +52,41 @@
                                 </div>
                             </td>
                             <td class="col-md-2 left">{{ todo.dueDate | date:"dd/MM/yyyy" : 'utc' }}</td>
-                            <td class="col-md-2 left" ng-show="showedit[todo.id]"><a href="" ng-click="alterTodo(todo)">save</a></td>
-                            <td class="col-md-2 left" ng-hide="showedit[todo.id]"><a href="" ng-click="editTodo(todo)">edit</a></td>
-                            <td class="col-md-2 left"><a href="" ng-click="deleteTodo(todo.id)">remove</a></td>
-                            <td class="col-md-2 left" ng-show="todo.file"><a href="" ng-click="download(todo)">download</a></td>
+                            <td class="col-md-2 left" ng-show="showedit[todo.id]"><a href="" ng-click="alterTodo(todo)" class="glyphicon glyphicon-ok"></a></td>
+                            <td class="col-md-2 left" ng-hide="showedit[todo.id]"><a href="" ng-click="editTodo(todo)" class="glyphicon glyphicon-edit"></a></td>
+                            <td class="col-md-2 left"><a href="" ng-click="deleteTodo(todo.id)" class="glyphicon glyphicon-remove"></a></td>
+                            <td class="col-md-2 left" ng-show="todo.file"><a href="" ng-click="download(todo)" class="glyphicon glyphicon-download-alt"></a></td>
                         </tr>
                     </tbody>
                 </table>
+                <div class="text-center">
+                    <button type="submit" class="btn glyphicon glyphicon-chevron-left" ng-click="getTodo(formData.page-1)"></button>
+                    {{ formData.page }}                
+                    <button type="submit" class="btn glyphicon glyphicon-chevron-right" ng-click="getTodo(formData.page+1)"></button>
+                </div>
             </div>
         </div>
 
         <div id="todo-form" class="row">
             <div class="col-sm-8 col-sm-offset-2 text-center">
-                <form>
-                    <div class="form-group">
-                        <input type="text" class="form-control input-lg text-center" placeholder="I want to buy a puppy that will love me forever" ng-model="formData.text">
+                <form name="frm" novalidate="">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <input type="text" class="form-control input-lg text-center" placeholder="I want to buy a puppy that will love me forever" ng-model="formData.text" name="text" ng-required="true">
+                                <span class="form-control alert-danger" ng-show="frm.text.$invalid && frm.$submitted">The task is required.</span>
+                            </div>
+                        </div> 
+                        <div class="col-md-4">   
+                            <div class="form-group">
+                                <input type="date" class="form-control input-lg text-center" ng-model="formData.date" min="2017-03-08" max="2025-12-31" ng-model-options="{timezone:'UTC'}">
+                            </div>  
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <input type="date" class="form-control input-lg text-center" placeholder="Expiration Date" ng-model="formData.date" min="2017-03-08" max="2025-12-31" ng-model-options="{timezone:'UTC'}">
-                    </div>  
                     <div class="form-group">
                         <input type="file" file-model="formData.file"/>
                     </div>                    
-                    <button type="submit" class="btn btn-primary btn-lg" ng-click="createTodo()">Add</button>
+                    <button type="submit" class="btn btn-primary btn-lg" ng-click="frm.$valid && createTodo()">Add</button>
                 </form>
             </div>
         </div>
